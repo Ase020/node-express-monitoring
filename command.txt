@@ -1,0 +1,3 @@
+## Grafana username and password
+export GRAFANA_USERNAME=admin
+export GRAFANA_PASSWORD=54985WmamYtnJff5uiOo7SFZg5Lz5ih0ove5DldP
