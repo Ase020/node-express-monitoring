@@ -1,0 +1,6 @@
+server:
+  service:
+    type: NodePort
+    nodePort: 30091
+persistence:
+  enabled: false

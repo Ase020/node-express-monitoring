@@ -1,0 +1,6 @@
+server:
+  service:
+    type: NodePort
+    nodePort: 30090
+alertmanager:
+  enabled: false

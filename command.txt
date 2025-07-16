@@ -1,3 +1,48 @@
 ## Grafana username and password
 export GRAFANA_USERNAME=admin
-export GRAFANA_PASSWORD=54985WmamYtnJff5uiOo7SFZg5Lz5ih0ove5DldP
+export GRAFANA_PASSWORD=
+
+## Install Prometheus & Grafana
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+
+# Create the monitoring namespace first
+kubectl create namespace monitoring
+
+# Install Prometheus using the values file
+helm install prometheus prometheus-community/prometheus -f prometheus.yaml -n monitoring
+
+
+# Edit ConfigMap of prometheus-server
+kubectl edit configmap prometheus-server -n monitoring
+
+## on scrape_configs, add:
+- job_name: 'node-app'
+  static_configs:
+  - targets: ['node-app.default.svc.cluster.local:3001']
+
+## Restart the prometheus-server
+kubectl rollout restart deployment prometheus-server -n monitoring
+
+## Port forward Prometheus to port 9090
+kubectl port-forward svc/prometheus-server 9090:80 -n monitoring
+
+# Install Prometheus using the values file
+helm install grafana grafana/grafana -f grafana.yaml -n monitoring
+
+## Get your admin user password using:
+kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
+## Port forward Grafana to port 3000
+kubectl port-forward svc/grafana 3000:80 -n monitoring
+
+## Login to grafana on localhost:3000
+    1. Add a data source (Prometheus)
+        name: prometheus-server
+        url: http://prometheus-server:80
+    2. Build a dashboard
+        import a dashboard
+        ID: 11159 (client basic metrics)
+        ID: 1860 (Node Exporter Full)
+        Datasource: Prometheus
